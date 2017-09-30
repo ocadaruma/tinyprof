@@ -38,7 +38,7 @@ type result struct {
 
 type resultRow struct {
 	count int
-	total time.Duration
+	sum   time.Duration
 	max   time.Duration
 	min   time.Duration
 	avg   time.Duration
@@ -84,7 +84,7 @@ func Write(w io.Writer, registry *ProfilerRegistry) {
 	result := r.aggregate()
 	writer := tablewriter.NewWriter(w)
 	writer.SetHeader([]string{
-		"Name", "count", "total(ms)", "max(ms)", "min(ms)", "avg(ms)",
+		"Name", "count", "sum(ms)", "max(ms)", "min(ms)", "avg(ms)",
 	})
 	writer.SetAutoFormatHeaders(false)
 	writer.SetAlignment(tablewriter.ALIGN_RIGHT)
@@ -93,7 +93,7 @@ func Write(w io.Writer, registry *ProfilerRegistry) {
 		writer.Append([]string{
 			id,
 			strconv.Itoa(row.count),
-			formatDuration(row.total),
+			formatDuration(row.sum),
 			formatDuration(row.max),
 			formatDuration(row.min),
 			formatDuration(row.avg),
@@ -128,14 +128,14 @@ func (r *ProfilerRegistry) aggregate() result {
 				}
 
 				row.count += 1
-				row.total += d
+				row.sum += d
 				if d <= row.min {
 					row.min = d
 				}
 				if d >= row.max {
 					row.max = d
 				}
-				row.avg = row.total / time.Duration(row.count)
+				row.avg = row.sum / time.Duration(row.count)
 			}
 		}
 	}
